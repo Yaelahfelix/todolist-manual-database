@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Todolist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="h-full bg-slate-50 flex flex-col items-center ">
+    <form id="addTodo" class="bg-white w-full flex gap-5 justify-center items-center sticky top-0 py-5">
+      <label class="flex flex-col">
+      Name:
+      <input type="text" name="name" id="name" class="bg-slate-300"/>
+      </label>
+
+      <label class="flex flex-col">
+      Priority:
+      <select class="bg-slate-300" id="priority" name="priority">
+        <option value="low">Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+      </select>
+      </label>
+      <button type="submit">Add todo</button>
+    </form>
+    <div id="todos" class="w-9/12 flex flex-col gap-5 p-20">
+      <% data.forEach((data) => { %>
+      <div class="flex justify-between bg-white shadow p-5 rounded border-l-4 <% if (data.priority === "high") { %>
+       border-red-500
+      <% } else if(data.priority === "medium") {%>
+          border-yellow-500
+        <% } else if(data.priority === "low") {%>
+            border-blue-500
+          <% } %>">
+        <div>
+          <div class="text-xl font-bold text-sky-700"><%= data.name %></div>
+          <div>Priority: <%= data.priority %></div>
+        </div>
+        <button class="deleteTodo" id="<%= data.id %>">Delete</button>
+      </div>
+      <% }) %>
+    </div>
+
+
+    <script>
+      const form = document.getElementById("addTodo");
+      const deleteTodos = document.getElementsByClassName("deleteTodo");
+
+      // Delete Handler
+      Array.from(deleteTodos).forEach((deleteTodo) => {
+        deleteTodo.addEventListener("click", async (e) => {
+          const id = e.currentTarget.id;
+
+          const res = await fetch(`/delete/${id}`, {
+            method: "DELETE",
+          });
+
+          if (res.status === 200) {
+            window.location.reload();
+          }
+        });
+      });
+
+      // Create Handler
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const data = {
+          name: form.elements.name.value,
+          priority: form.elements.priority.value,
+        };
+
+        console.log(data);
+        const res = await fetch("/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+
+        if (res.status === 200) {
+          window.location.reload();
+        }
+      });
+    </script>
+  </body>
+</html>
